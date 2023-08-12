@@ -1,23 +1,38 @@
-import logo from './logo.svg';
+import { collection, doc, getDocs, onSnapshot } from 'firebase/firestore';
 import './App.css';
+import db from './firebase';
+import { useState, useEffect } from 'react';
 
 function App() {
+  const [posts, setPosts] = useState([])
+
+  useEffect(() => {
+    // dbから取得 最初の一回
+    const postData = collection(db, "posts");
+    console.log(postData)
+    getDocs(postData).then((snapshot) => {
+      setPosts(snapshot.docs.map((doc) => ({...doc.data() })))
+    })
+
+    // リアルタイムで取得
+    onSnapshot(postData, (post) => {
+      setPosts(post.docs.map((doc) => ({ ...doc.data() })));
+  });
+  
+    return () => {
+      
+    }
+  }, [])
+  
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {posts.map((post) => (
+
+        <div key={post.title}>
+          <h1>{post.title}</h1>
+          <p>{post.text}</p>
+        </div>
+      ))}
     </div>
   );
 }
